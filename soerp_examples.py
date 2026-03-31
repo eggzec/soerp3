@@ -1,4 +1,3 @@
-# ...existing code...
 """
 Created on Mon Jun 24 17:13:42 2013
 
@@ -6,16 +5,8 @@ Created on Mon Jun 24 17:13:42 2013
 """
 
 import math
-import os
-import sys
 
-
-pwd = r"/".join(os.path.dirname(os.path.abspath(__file__)).split("/")[:-1])
-if pwd not in sys.path:
-    sys.path.append(pwd)
-
-from soerp3 import *
-from soerp3 import umath
+from soerp3 import Chi2, Exp, Gamma, N, umath, uv
 
 
 print("UNCERTAIN DISTRIBUTION TEST FUNCTIONS USING GIVEN MOMENTS")
@@ -86,11 +77,12 @@ except ImportError:
 else:
     print("*" * 80)
     print("SAME TEST FUNCTIONS USING DERIVED MOMENTS FROM SCIPY DISTRIBUTIONS")
+
     print("*" * 80)
     print("Example of a three part assembly")
-    x1 = uv(rv=ss.norm(loc=24, scale=1))  # normal distributed
-    x2 = uv(rv=ss.norm(loc=37, scale=4))  # normal distributed
-    x3 = uv(rv=ss.expon(scale=1 / 2.0))  # exponential distributed
+    x1 = uv(rv=ss.norm(loc=24, scale=1))  # normally distributed
+    x2 = uv(rv=ss.norm(loc=37, scale=4))  # normally distributed
+    x3 = uv(rv=ss.expon(scale=1 / 2.0))  # exponentially distributed
     Z = (x1 * x2**2) / (15 * (1.5 + x3))
     print("Results should be about:")
     print(" > Mean...................  1176.45")
@@ -101,10 +93,10 @@ else:
 
     print("*" * 80)
     print("Example of volumetric gas flow through orifice meter")
-    H = uv(rv=ss.norm(loc=64, scale=0.5))  # normal distributed
-    M = uv(rv=ss.norm(loc=16, scale=0.1))  # normal distributed
-    P = uv(rv=ss.norm(loc=361, scale=2))  # normal distributed
-    t = uv(rv=ss.norm(loc=165, scale=0.5))  # normal distributed
+    H = uv(rv=ss.norm(loc=64, scale=0.5))
+    M = uv(rv=ss.norm(loc=16, scale=0.1))
+    P = uv(rv=ss.norm(loc=361, scale=2))
+    t = uv(rv=ss.norm(loc=165, scale=0.5))
     C = 38.4
     Q = C * umath.sqrt((520 * H * P) / (M * (t + 460)))
     print("Results should be about:")
@@ -123,9 +115,9 @@ else:
     vr = 0.25
     scale = vr / mn
     shape = mn**2 / vr
-    x = uv(rv=ss.gamma(shape, scale=scale))  # gamma distributed
-    y = uv(rv=ss.gamma(shape, scale=scale))  # gamma distributed
-    z = uv(rv=ss.gamma(shape, scale=scale))  # gamma distributed
+    x = uv(rv=ss.gamma(shape, scale=scale))
+    y = uv(rv=ss.gamma(shape, scale=scale))
+    z = uv(rv=ss.gamma(shape, scale=scale))
     w = x + y + z
     print("Results should be about:")
     print(" > Mean...................  4.5")
@@ -136,20 +128,20 @@ else:
 
     print("*" * 80)
     print("Example of scheduling facilities (six stations)")
-    s1 = uv(rv=ss.norm(loc=10, scale=1))  # normal distributed
-    s2 = uv(rv=ss.norm(loc=20, scale=2**0.5))  # normal distributed
+    s1 = uv(rv=ss.norm(loc=10, scale=1))
+    s2 = uv(rv=ss.norm(loc=20, scale=2**0.5))
     mn1 = 1.5
     vr1 = 0.25
     scale1 = vr1 / mn1
     shape1 = mn1**2 / vr1
-    s3 = uv(rv=ss.gamma(shape1, scale=scale1))  # gamma distributed
+    s3 = uv(rv=ss.gamma(shape1, scale=scale1))
     mn2 = 10
     vr2 = 10
     scale2 = vr2 / mn2
     shape2 = mn2**2 / vr2
-    s4 = uv(rv=ss.gamma(shape2, scale=scale2))  # gamma distributed
-    s5 = uv(rv=ss.expon(scale=0.2))  # exponential distributed
-    s6 = uv(rv=ss.chi2(10))  # chi-square distributed
+    s4 = uv(rv=ss.gamma(shape2, scale=scale2))
+    s5 = uv(rv=ss.expon(scale=0.2))
+    s6 = uv(rv=ss.chi2(10))
     T = s1 + s2 + s3 + s4 + s5 + s6
     print("Results should be about:")
     print(" > Mean...................  51.7")
@@ -160,13 +152,13 @@ else:
 
     print("*" * 80)
     print("Example of two-bar truss")
-    H = uv(rv=ss.norm(loc=30, scale=5 / 3.0), tag="H")  # normal distributed
-    B = uv(rv=ss.norm(loc=60, scale=0.5 / 3.0), tag="B")  # normal distributed
-    d = uv(rv=ss.norm(loc=3, scale=0.1 / 3), tag="d")  # normal distributed
-    t = uv(rv=ss.norm(loc=0.15, scale=0.01 / 3), tag="t")  # normal distributed
-    E = uv(rv=ss.norm(loc=30000, scale=1500 / 3.0), tag="E")  # normal distributed
-    rho = uv(rv=ss.norm(loc=0.3, scale=0.01 / 3.0), tag="rho")  # normal distributed
-    P = uv(rv=ss.norm(loc=66, scale=3 / 3.0), tag="P")  # normal distributed
+    H = uv(rv=ss.norm(loc=30, scale=5 / 3.0), tag="H")
+    B = uv(rv=ss.norm(loc=60, scale=0.5 / 3.0), tag="B")
+    d = uv(rv=ss.norm(loc=3, scale=0.1 / 3), tag="d")
+    t = uv(rv=ss.norm(loc=0.15, scale=0.01 / 3), tag="t")
+    E = uv(rv=ss.norm(loc=30000, scale=1500 / 3.0), tag="E")
+    rho = uv(rv=ss.norm(loc=0.3, scale=0.01 / 3.0), tag="rho")
+    P = uv(rv=ss.norm(loc=66, scale=3 / 3.0), tag="P")
     pi = math.pi
     wght = 2 * pi * rho * d * t * umath.sqrt((B / 2) ** 2 + H**2)
     strs = (P * umath.sqrt((B / 2) ** 2 + H**2)) / (2 * pi * d * t * H)
@@ -182,11 +174,12 @@ else:
 
     print("*" * 80)
     print("SAME TEST FUNCTIONS USING EASY DISTRIBUTION CONSTRUCTORS")
+
     print("*" * 80)
     print("Example of a three part assembly")
-    x1 = n(24, 1)  # normally distributed
-    x2 = n(37, 4)  # normally distributed
-    x3 = exp(2)  # exponentially distributed
+    x1 = N(24, 1)  # normally distributed
+    x2 = N(37, 4)  # normally distributed
+    x3 = Exp(2)  # exponentially distributed
     Z = (x1 * x2**2) / (15 * (1.5 + x3))
     print("Results should be about:")
     print(" > Mean...................  1176.45")
@@ -197,10 +190,10 @@ else:
 
     print("*" * 80)
     print("Example of volumetric gas flow through orifice meter")
-    H = n(64, 0.5)
-    M = n(16, 0.1)
-    P = n(361, 2)
-    t = n(165, 0.5)
+    H = N(64, 0.5)
+    M = N(16, 0.1)
+    P = N(361, 2)
+    t = N(165, 0.5)
     C = 38.4
     Q = C * umath.sqrt((520 * H * P) / (M * (t + 460)))
     print("Results should be about:")
@@ -219,9 +212,9 @@ else:
     vr = 0.25
     scale = vr / mn
     shape = mn**2 / vr
-    x = gamma(shape, scale)
-    y = gamma(shape, scale)
-    z = gamma(shape, scale)
+    x = Gamma(shape, scale)
+    y = Gamma(shape, scale)
+    z = Gamma(shape, scale)
     w = x + y + z
     print("Results should be about:")
     print(" > Mean...................  4.5")
@@ -232,20 +225,20 @@ else:
 
     print("*" * 80)
     print("Example of scheduling facilities (six stations)")
-    s1 = n(10, 1)
-    s2 = n(20, 2**0.5)
+    s1 = N(10, 1)
+    s2 = N(20, 2**0.5)
     mn1 = 1.5
     vr1 = 0.25
     scale1 = vr1 / mn1
     shape1 = mn1**2 / vr1
-    s3 = gamma(shape1, scale1)
+    s3 = Gamma(shape1, scale1)
     mn2 = 10
     vr2 = 10
     scale2 = vr2 / mn2
     shape2 = mn2**2 / vr2
-    s4 = gamma(shape2, scale2)
-    s5 = exp(5)
-    s6 = chi2(10)
+    s4 = Gamma(shape2, scale2)
+    s5 = Exp(5)
+    s6 = Chi2(10)
     T = s1 + s2 + s3 + s4 + s5 + s6
     print("Results should be about:")
     print(" > Mean...................  51.7")
@@ -256,13 +249,13 @@ else:
 
     print("*" * 80)
     print("Example of two-bar truss")
-    H = n(30, 5 / 3.0, tag="H")
-    B = n(60, 0.5 / 3.0, tag="B")
-    d = n(3, 0.1 / 3, tag="d")
-    t = n(0.15, 0.01 / 3, tag="t")
-    E = n(30000, 1500 / 3.0, tag="E")
-    rho = n(0.3, 0.01 / 3.0, tag="rho")
-    P = n(66, 3 / 3.0, tag="P")
+    H = N(30, 5 / 3.0, tag="H")
+    B = N(60, 0.5 / 3.0, tag="B")
+    d = N(3, 0.1 / 3, tag="d")
+    t = N(0.15, 0.01 / 3, tag="t")
+    E = N(30000, 1500 / 3.0, tag="E")
+    rho = N(0.3, 0.01 / 3.0, tag="rho")
+    P = N(66, 3 / 3.0, tag="P")
     pi = math.pi
     wght = 2 * pi * rho * d * t * umath.sqrt((B / 2) ** 2 + H**2)
     strs = (P * umath.sqrt((B / 2) ** 2 + H**2)) / (2 * pi * d * t * H)
