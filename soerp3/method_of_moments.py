@@ -1,6 +1,8 @@
+import math
 from copy import copy
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 assume_linear = False  # if True, the sqc and scp parts are ignored
@@ -8,7 +10,7 @@ assume_linear = False  # if True, the sqc and scp parts are ignored
 ###############################################################################
 
 
-def standard_lc(lc, stdevs):
+def standard_lc(lc: NDArray, stdevs: NDArray) -> NDArray:
     """
     Standardizes the first derivatives in preparation for moment calculation.
 
@@ -24,13 +26,15 @@ def standard_lc(lc, stdevs):
     slc : array
         The standardized first-order derivatives
     """
-    return np.array([coef * stdev for coef, stdev in zip(lc, stdevs)])
+    return np.array([
+        coef * stdev for coef, stdev in zip(lc, stdevs, strict=False)
+    ])
 
 
 ###############################################################################
 
 
-def standard_qc(qc, stdevs):
+def standard_qc(qc: NDArray, stdevs: NDArray) -> NDArray:
     """
     Standardizes the pure second derivatives in preparation for moment
     calculation.
@@ -47,13 +51,15 @@ def standard_qc(qc, stdevs):
     sqc : array
         The standardized pure second-order derivatives
     """
-    return np.array([coef * stdev**2 for coef, stdev in zip(qc, stdevs)])
+    return np.array([
+        coef * stdev**2 for coef, stdev in zip(qc, stdevs, strict=False)
+    ])
 
 
 ###############################################################################
 
 
-def standard_cp(cp, stdevs):
+def standard_cp(cp: NDArray, stdevs: NDArray) -> NDArray:
     """
     Standardizes the cross-product second derivatives in preparation for
     moment calculation.
@@ -84,7 +90,9 @@ def standard_cp(cp, stdevs):
 ###############################################################################
 
 
-def standardize(lc, qc, cp, stdevs):
+def standardize(
+    lc: NDArray, qc: NDArray, cp: NDArray, stdevs: NDArray
+) -> tuple[NDArray, NDArray, NDArray]:
     """
     A helper function to convert normal first and second-order partial
     derivatives to "standardized" partial derivatives, in preparation for
@@ -120,7 +128,9 @@ def standardize(lc, qc, cp, stdevs):
 ###############################################################################
 
 
-def rawmoment(slc, sqc, scp, vm, k):
+def rawmoment(  # noqa: PLR0912, PLR0915
+    slc: NDArray, sqc: NDArray, scp: NDArray, vm: NDArray, k: int
+) -> float:
     """
     This is where the resultant distribution moments are calculated. MODIFY
     THIS CODE AT YOUR OWN RISK. These equations have been verified with
@@ -167,7 +177,7 @@ def rawmoment(slc, sqc, scp, vm, k):
     ############################
     # The 0th raw moment
 
-    if k == 0:
+    if k == 0:  # noqa: PLR1702
         ans = 1
 
     ############################
@@ -232,21 +242,21 @@ def rawmoment(slc, sqc, scp, vm, k):
         if n >= 3:
             for i in range(n - 2):
                 for j in range(i + 1, n - 1):
-                    for k in range(j + 1, n):
+                    for m in range(j + 1, n):
                         ans += (
                             (
-                                6 * qc[i] * qc[j] * qc[k]
-                                + 6 * cp[i, j] * cp[i, k] * cp[j, k]
+                                6 * qc[i] * qc[j] * qc[m]
+                                + 6 * cp[i, j] * cp[i, m] * cp[j, m]
                                 + 3
                                 * (
-                                    qc[i] * cp[j, k] ** 2
-                                    + qc[j] * cp[i, k] ** 2
-                                    + qc[k] * cp[i, j] ** 2
+                                    qc[i] * cp[j, m] ** 2
+                                    + qc[j] * cp[i, m] ** 2
+                                    + qc[m] * cp[i, j] ** 2
                                 )
                             )
                             * vm[i, 2]
                             * vm[j, 2]
-                            * vm[k, 1]
+                            * vm[m, 1]
                         )
 
     ############################
@@ -384,287 +394,299 @@ def rawmoment(slc, sqc, scp, vm, k):
         if n >= 3:
             for i in range(n - 2):
                 for j in range(i + 1, n - 1):
-                    for k in range(j + 1, n):
+                    for kk in range(j + 1, n):
                         ans += (
                             (
-                                12 * qc[i] ** 2 * qc[j] * qc[k]
-                                + 6 * cp[i, j] ** 2 * cp[i, k] ** 2
+                                12 * qc[i] ** 2 * qc[j] * qc[kk]
+                                + 6 * cp[i, j] ** 2 * cp[i, kk] ** 2
                                 + 12
                                 * qc[i]
                                 * (
-                                    qc[k] * cp[i, j] ** 2
-                                    + qc[j] * cp[i, k] ** 2
+                                    qc[kk] * cp[i, j] ** 2
+                                    + qc[j] * cp[i, kk] ** 2
                                 )
-                                + 6 * qc[i] ** 2 * cp[j, k]
+                                + 6 * qc[i] ** 2 * cp[j, kk]
                             )
                             * vm[i, 4]
                             * vm[j, 2]
-                            * vm[k, 2]
+                            * vm[kk, 2]
                         )
                         ans += (
                             (
-                                12 * qc[i] * qc[j] ** 2 * qc[k]
-                                + 6 * cp[i, j] ** 2 * cp[j, k] ** 2
+                                12 * qc[i] * qc[j] ** 2 * qc[kk]
+                                + 6 * cp[i, j] ** 2 * cp[j, kk] ** 2
                                 + 12
                                 * qc[j]
                                 * (
-                                    qc[k] * cp[i, j] ** 2
-                                    + qc[i] * cp[j, k] ** 2
+                                    qc[kk] * cp[i, j] ** 2
+                                    + qc[i] * cp[j, kk] ** 2
                                 )
-                                + 6 * qc[j] ** 2 * cp[i, k] ** 2
+                                + 6 * qc[j] ** 2 * cp[i, kk] ** 2
                             )
                             * vm[i, 2]
                             * vm[j, 4]
-                            * vm[k, 2]
+                            * vm[kk, 2]
                         )
                         ans += (
                             (
-                                12 * qc[i] * qc[j] * qc[k] ** 2
-                                + 6 * cp[i, k] ** 2 * cp[j, k] ** 2
+                                12 * qc[i] * qc[j] * qc[kk] ** 2
+                                + 6 * cp[i, kk] ** 2 * cp[j, kk] ** 2
                                 + 12
-                                * qc[k]
+                                * qc[kk]
                                 * (
-                                    qc[i] * cp[j, k] ** 2
-                                    + qc[j] * cp[i, k] ** 2
+                                    qc[i] * cp[j, kk] ** 2
+                                    + qc[j] * cp[i, kk] ** 2
                                 )
-                                + 6 * qc[k] ** 2 * cp[i, j] ** 2
+                                + 6 * qc[kk] ** 2 * cp[i, j] ** 2
                             )
                             * vm[i, 2]
                             * vm[j, 2]
-                            * vm[k, 4]
+                            * vm[kk, 4]
                         )
                         ans += (
                             (
-                                12 * cp[i, j] ** 2 * cp[i, k] * cp[j, k]
-                                + 24 * qc[i] * qc[j] * qc[k] * cp[i, j]
-                                + 4 * qc[k] * cp[i, j] ** 3
-                                + 24 * qc[i] * qc[k] * cp[i, k] * cp[j, k]
+                                12 * cp[i, j] ** 2 * cp[i, kk] * cp[j, kk]
+                                + 24 * qc[i] * qc[j] * qc[kk] * cp[i, j]
+                                + 4 * qc[kk] * cp[i, j] ** 3
+                                + 24 * qc[i] * qc[kk] * cp[i, kk] * cp[j, kk]
                             )
                             * vm[i, 3]
                             * vm[j, 3]
-                            * vm[k, 2]
+                            * vm[kk, 2]
                         )
                         ans += (
                             (
-                                12 * cp[i, j] * cp[i, k] ** 2 * cp[j, k]
-                                + 24 * qc[i] * qc[j] * qc[k] * cp[i, k]
-                                + 4 * qc[j] * cp[i, k] ** 3
-                                + 24 * qc[i] * qc[k] * cp[i, j] * cp[j, k]
+                                12 * cp[i, j] * cp[i, kk] ** 2 * cp[j, kk]
+                                + 24 * qc[i] * qc[j] * qc[kk] * cp[i, kk]
+                                + 4 * qc[j] * cp[i, kk] ** 3
+                                + 24 * qc[i] * qc[kk] * cp[i, j] * cp[j, kk]
                             )
                             * vm[i, 3]
                             * vm[j, 2]
-                            * vm[k, 3]
+                            * vm[kk, 3]
                         )
                         ans += (
                             (
-                                12 * cp[i, j] * cp[i, k] * cp[j, k] ** 2
-                                + 24 * qc[i] * qc[j] * qc[k] * cp[j, k]
-                                + 4 * qc[i] * cp[j, k] ** 3
-                                + 24 * qc[j] * qc[j] * cp[i, j] * cp[i, k]
+                                12 * cp[i, j] * cp[i, kk] * cp[j, kk] ** 2
+                                + 24 * qc[i] * qc[j] * qc[kk] * cp[j, kk]
+                                + 4 * qc[i] * cp[j, kk] ** 3
+                                + 24 * qc[j] * qc[j] * cp[i, j] * cp[i, kk]
                             )
                             * vm[i, 2]
                             * vm[j, 3]
-                            * vm[k, 3]
+                            * vm[kk, 3]
                         )
                         ans += (
                             (
-                                12 * cp[i, j] * cp[i, k] * cp[j, k]
-                                + 24 * qc[i] * qc[j] * qc[k] * cp[j, k]
-                                + 4 * qc[i] * cp[j, k] ** 3
-                                + 24 * qc[j] * qc[k] * cp[i, j] * cp[i, k]
+                                12 * cp[i, j] * cp[i, kk] * cp[j, kk]
+                                + 24 * qc[i] * qc[j] * qc[kk] * cp[j, kk]
+                                + 4 * qc[i] * cp[j, kk] ** 3
+                                + 24 * qc[j] * qc[kk] * cp[i, j] * cp[i, kk]
                             )
                             * vm[i, 2]
                             * vm[j, 3]
-                            * vm[k, 3]
+                            * vm[kk, 3]
                         )
                         ans += (
                             24
                             * (
-                                qc[i] * qc[j] * qc[k]
-                                + cp[i, j] * cp[i, k] * cp[j, k]
+                                qc[i] * qc[j] * qc[kk]
+                                + cp[i, j] * cp[i, kk] * cp[j, kk]
                             )
                             * (
-                                lc[i] * vm[i, 3] * vm[j, 2] * vm[k, 2]
-                                + lc[j] * vm[i, 2] * vm[j, 3] * vm[k, 2]
-                                + lc[k] * vm[i, 2] * vm[j, 2] * vm[k, 3]
+                                lc[i] * vm[i, 3] * vm[j, 2] * vm[kk, 2]
+                                + lc[j] * vm[i, 2] * vm[j, 3] * vm[kk, 2]
+                                + lc[kk] * vm[i, 2] * vm[j, 2] * vm[kk, 3]
                             )
                         )
                         ans += 12 * (
                             lc[i]
-                            * cp[j, k] ** 2
+                            * cp[j, kk] ** 2
                             * vm[i, 2]
                             * (
-                                cp[i, j] * vm[j, 3] * vm[k, 2]
-                                + cp[i, k] * vm[j, 2] * vm[k, 3]
+                                cp[i, j] * vm[j, 3] * vm[kk, 2]
+                                + cp[i, kk] * vm[j, 2] * vm[kk, 3]
                             )
                             + lc[j]
-                            * cp[i, k] ** 2
+                            * cp[i, kk] ** 2
                             * vm[j, 2]
                             * (
-                                cp[i, j] * vm[i, 3] * vm[k, 2]
-                                + cp[j, k] * vm[i, 2] * vm[k, 3]
+                                cp[i, j] * vm[i, 3] * vm[kk, 2]
+                                + cp[j, kk] * vm[i, 2] * vm[kk, 3]
                             )
-                            + lc[k]
+                            + lc[kk]
                             * cp[i, j] ** 2
-                            * vm[k, 2]
+                            * vm[kk, 2]
                             * (
-                                cp[i, k] * vm[i, 3] * vm[j, 2]
-                                + cp[j, k] * vm[i, 2] * vm[j, 3]
+                                cp[i, kk] * vm[i, 3] * vm[j, 2]
+                                + cp[j, kk] * vm[i, 2] * vm[j, 3]
                             )
                         )
                         ans += 12 * (
                             qc[i]
-                            * cp[j, k] ** 2
+                            * cp[j, kk] ** 2
                             * vm[i, 3]
                             * (
-                                cp[i, j] * vm[j, 3] * vm[k, 2]
-                                + cp[i, k] * vm[j, 2] * vm[k, 3]
+                                cp[i, j] * vm[j, 3] * vm[kk, 2]
+                                + cp[i, kk] * vm[j, 2] * vm[kk, 3]
                             )
                             + qc[j]
-                            * cp[i, k] ** 2
+                            * cp[i, kk] ** 2
                             * vm[j, 3]
                             * (
-                                cp[i, j] * vm[i, 3] * vm[k, 2]
-                                + cp[j, k] * vm[i, 2] * vm[k, 3]
+                                cp[i, j] * vm[i, 3] * vm[kk, 2]
+                                + cp[j, kk] * vm[i, 2] * vm[kk, 3]
                             )
-                            + qc[k]
+                            + qc[kk]
                             * cp[i, j] ** 2
-                            * vm[k, 3]
+                            * vm[kk, 3]
                             * (
-                                cp[i, k] * vm[i, 3] * vm[j, 2]
-                                + cp[j, k] * vm[i, 2] * vm[j, 3]
+                                cp[i, kk] * vm[i, 3] * vm[j, 2]
+                                + cp[j, kk] * vm[i, 2] * vm[j, 3]
                             )
                         )
                         ans += (
                             24
                             * cp[i, j]
-                            * cp[i, k]
-                            * cp[j, k]
+                            * cp[i, kk]
+                            * cp[j, kk]
                             * (
-                                qc[i] * vm[i, 4] * vm[j, 2] * vm[k, 2]
-                                + qc[j] * vm[i, 2] * vm[j, 4] * vm[k, 2]
-                                + qc[k] * vm[i, 2] * vm[j, 2] * vm[k, 4]
+                                qc[i] * vm[i, 4] * vm[j, 2] * vm[kk, 2]
+                                + qc[j] * vm[i, 2] * vm[j, 4] * vm[kk, 2]
+                                + qc[kk] * vm[i, 2] * vm[j, 2] * vm[kk, 4]
                             )
                         )
                         ans += (
                             vm[i, 2]
                             * vm[j, 2]
-                            * vm[k, 2]
+                            * vm[kk, 2]
                             * (
                                 12
                                 * (
-                                    qc[i] * qc[j] * lc[k] ** 2
-                                    + qc[i] * qc[k] * lc[j] ** 2
-                                    + qc[j] * qc[k] * lc[i] ** 2
+                                    qc[i] * qc[j] * lc[kk] ** 2
+                                    + qc[i] * qc[kk] * lc[j] ** 2
+                                    + qc[j] * qc[kk] * lc[i] ** 2
                                 )
                                 + 6
                                 * (
-                                    lc[i] ** 2 * cp[j, k] ** 2
-                                    + lc[j] ** 2 * cp[i, k] ** 2
-                                    + lc[k] ** 2 * cp[i, j] ** 2
+                                    lc[i] ** 2 * cp[j, kk] ** 2
+                                    + lc[j] ** 2 * cp[i, kk] ** 2
+                                    + lc[kk] ** 2 * cp[i, j] ** 2
                                 )
                                 + 24
                                 * (
-                                    cp[i, j] * cp[i, k] * lc[j] * lc[k]
-                                    + cp[i, j] * cp[j, k] * lc[i] * lc[k]
-                                    + cp[i, k] * cp[j, k] * lc[i] * lc[j]
+                                    cp[i, j] * cp[i, kk] * lc[j] * lc[kk]
+                                    + cp[i, j] * cp[j, kk] * lc[i] * lc[kk]
+                                    + cp[i, kk] * cp[j, kk] * lc[i] * lc[j]
                                 )
                                 + 24
                                 * (
-                                    lc[i] * lc[j] * qc[k] * cp[i, j]
-                                    + lc[i] * lc[k] * qc[j] * cp[i, k]
-                                    + lc[j] * lc[k] * qc[i] * cp[j, k]
+                                    lc[i] * lc[j] * qc[kk] * cp[i, j]
+                                    + lc[i] * lc[kk] * qc[j] * cp[i, kk]
+                                    + lc[j] * lc[kk] * qc[i] * cp[j, kk]
                                 )
                             )
                         )
                         ans += (
                             vm[i, 3]
                             * vm[j, 2]
-                            * vm[k, 2]
+                            * vm[kk, 2]
                             * (
-                                24 * lc[j] * cp[i, j] * qc[i] * qc[k]
-                                + 24 * lc[k] * cp[i, k] * qc[i] * qc[j]
-                                + 12 * lc[i] * cp[j, k] ** 2 * qc[i]
-                                + 24 * lc[j] * cp[i, k] * cp[j, k] * qc[i]
-                                + 24 * lc[k] * cp[i, j] * cp[j, k] * qc[i]
-                                + 12 * lc[i] * cp[i, k] ** 2 * qc[j]
-                                + 12 * lc[i] * cp[i, j] ** 2 * qc[k]
+                                24 * lc[j] * cp[i, j] * qc[i] * qc[kk]
+                                + 24 * lc[kk] * cp[i, kk] * qc[i] * qc[j]
+                                + 12 * lc[i] * cp[j, kk] ** 2 * qc[i]
+                                + 24 * lc[j] * cp[i, kk] * cp[j, kk] * qc[i]
+                                + 24 * lc[kk] * cp[i, j] * cp[j, kk] * qc[i]
+                                + 12 * lc[i] * cp[i, kk] ** 2 * qc[j]
+                                + 12 * lc[i] * cp[i, j] ** 2 * qc[kk]
                             )
                         )
                         ans += (
                             vm[i, 2]
                             * vm[j, 3]
-                            * vm[k, 2]
+                            * vm[kk, 2]
                             * (
-                                24 * lc[i] * cp[i, j] * qc[j] * qc[k]
-                                + 24 * lc[k] * cp[j, k] * qc[i] * qc[j]
-                                + 12 * lc[j] * cp[i, k] ** 2 * qc[j]
-                                + 24 * lc[i] * cp[i, k] * cp[j, k] * qc[j]
-                                + 24 * lc[k] * cp[i, j] * cp[i, k] * qc[j]
-                                + 12 * lc[j] * cp[j, k] ** 2 * qc[i]
-                                + 12 * lc[j] * cp[i, j] ** 2 * qc[k]
+                                24 * lc[i] * cp[i, j] * qc[j] * qc[kk]
+                                + 24 * lc[kk] * cp[j, kk] * qc[i] * qc[j]
+                                + 12 * lc[j] * cp[i, kk] ** 2 * qc[j]
+                                + 24 * lc[i] * cp[i, kk] * cp[j, kk] * qc[j]
+                                + 24 * lc[kk] * cp[i, j] * cp[i, kk] * qc[j]
+                                + 12 * lc[j] * cp[j, kk] ** 2 * qc[i]
+                                + 12 * lc[j] * cp[i, j] ** 2 * qc[kk]
                             )
                         )
                         ans += (
                             vm[i, 2]
                             * vm[j, 2]
-                            * vm[k, 3]
+                            * vm[kk, 3]
                             * (
-                                24 * lc[i] * cp[i, k] * qc[j] * qc[k]
-                                + 24 * lc[j] * cp[j, k] * qc[i] * qc[k]
-                                + 12 * lc[k] * cp[i, j] ** 2 * qc[k]
-                                + 24 * lc[i] * cp[i, j] * cp[j, k] * qc[k]
-                                + 24 * lc[j] * cp[i, j] * cp[i, k] * qc[k]
-                                + 12 * lc[k] * cp[j, k] ** 2 * qc[i]
-                                + 12 * lc[k] * cp[i, k] ** 2 * qc[j]
+                                24 * lc[i] * cp[i, kk] * qc[j] * qc[kk]
+                                + 24 * lc[j] * cp[j, kk] * qc[i] * qc[kk]
+                                + 12 * lc[kk] * cp[i, j] ** 2 * qc[kk]
+                                + 24 * lc[i] * cp[i, j] * cp[j, kk] * qc[kk]
+                                + 24 * lc[j] * cp[i, j] * cp[i, kk] * qc[kk]
+                                + 12 * lc[kk] * cp[j, kk] ** 2 * qc[i]
+                                + 12 * lc[kk] * cp[i, kk] ** 2 * qc[j]
                             )
                         )
 
         if n >= 4:
             for i in range(n - 3):
                 for j in range(i + 1, n - 2):
-                    for k in range(j + 1, n - 1):
-                        for m in range(k + 1, n):
+                    for kk in range(j + 1, n - 1):
+                        for m in range(kk + 1, n):
                             ans += (
                                 vm[i, 2]
                                 * vm[j, 2]
-                                * vm[k, 2]
+                                * vm[kk, 2]
                                 * vm[m, 2]
                                 * (
                                     24
                                     * (
-                                        qc[i] * qc[j] * qc[k] * qc[m]
+                                        qc[i] * qc[j] * qc[kk] * qc[m]
                                         + cp[i, j]
-                                        * cp[i, k]
+                                        * cp[i, kk]
                                         * cp[j, m]
-                                        * cp[k, m]
+                                        * cp[kk, m]
                                         + cp[i, j]
                                         * cp[i, m]
-                                        * cp[j, k]
-                                        * cp[k, m]
-                                        + cp[i, k]
+                                        * cp[j, kk]
+                                        * cp[kk, m]
+                                        + cp[i, kk]
                                         * cp[i, m]
-                                        * cp[j, k]
+                                        * cp[j, kk]
                                         * cp[j, m]
-                                        + qc[i] * cp[j, k] * cp[j, m] * cp[k, m]
-                                        + qc[j] * cp[i, k] * cp[i, m] * cp[i, m]
-                                        + qc[k] * cp[i, j] * cp[i, m] * cp[j, m]
-                                        + qc[m] * cp[i, j] * cp[i, k] * cp[j, k]
+                                        + qc[i]
+                                        * cp[j, kk]
+                                        * cp[j, m]
+                                        * cp[kk, m]
+                                        + qc[j]
+                                        * cp[i, kk]
+                                        * cp[i, m]
+                                        * cp[i, m]
+                                        + qc[kk]
+                                        * cp[i, j]
+                                        * cp[i, m]
+                                        * cp[j, m]
+                                        + qc[m]
+                                        * cp[i, j]
+                                        * cp[i, kk]
+                                        * cp[j, kk]
                                     )
                                     + 12
                                     * (
-                                        qc[i] * qc[j] * cp[k, m] ** 2
-                                        + qc[i] * qc[k] * cp[j, m] ** 2
-                                        + qc[i] * qc[m] * cp[j, k] ** 2
-                                        + qc[j] * qc[k] * cp[i, m] ** 2
-                                        + qc[j] * qc[m] * cp[i, k] ** 2
-                                        + qc[k] * qc[m] * cp[i, j] ** 2
+                                        qc[i] * qc[j] * cp[kk, m] ** 2
+                                        + qc[i] * qc[kk] * cp[j, m] ** 2
+                                        + qc[i] * qc[m] * cp[j, kk] ** 2
+                                        + qc[j] * qc[kk] * cp[i, m] ** 2
+                                        + qc[j] * qc[m] * cp[i, kk] ** 2
+                                        + qc[kk] * qc[m] * cp[i, j] ** 2
                                     )
                                     + 6
                                     * (
-                                        cp[i, j] ** 2 * cp[k, m] ** 2
-                                        + cp[i, k] ** 2 * cp[j, m] ** 2
-                                        + cp[i, m] ** 2 * cp[j, k] ** 2
+                                        cp[i, j] ** 2 * cp[kk, m] ** 2
+                                        + cp[i, kk] ** 2 * cp[j, m] ** 2
+                                        + cp[i, m] ** 2 * cp[j, kk] ** 2
                                     )
                                 )
                             )
@@ -681,7 +703,7 @@ def rawmoment(slc, sqc, scp, vm, k):
 ###############################################################################
 
 
-def centralmoment(vi, k):
+def centralmoment(vi: NDArray, k: int) -> float:
     """
     Converts raw distribution moments to central moments
 
@@ -719,7 +741,9 @@ def centralmoment(vi, k):
 ###############################################################################
 
 
-def variance_components(slc, sqc, scp, var_moments, vz):
+def variance_components(
+    slc: NDArray, sqc: NDArray, scp: NDArray, var_moments: NDArray, vz: NDArray
+) -> tuple[NDArray, NDArray, NDArray]:
     """
     Calculate the 1st and 2nd-order output variance components for each input
     variable.
@@ -785,7 +809,12 @@ def variance_components(slc, sqc, scp, var_moments, vz):
 ###############################################################################
 
 
-def variance_contrib(var_comp_lc, var_comp_qc, var_comp_cp, vz):
+def variance_contrib(
+    var_comp_lc: NDArray,
+    var_comp_qc: NDArray,
+    var_comp_cp: NDArray,
+    vz: NDArray,
+) -> tuple[NDArray, NDArray, NDArray]:
     """
     Convert actual variance components to percent contributions (best if used
     in conjunction with ``variance_components`` function).
@@ -844,9 +873,17 @@ def variance_contrib(var_comp_lc, var_comp_qc, var_comp_cp, vz):
 ###############################################################################
 
 
-def soerp_numeric(
-    slc, sqc, scp, var_moments, func0, title=None, debug=False, silent=False
-):
+def soerp_numeric(  # noqa: PLR0912, PLR0913, PLR0917
+    slc: NDArray,
+    sqc: NDArray,
+    scp: NDArray,
+    var_moments: NDArray,
+    func0: float,
+    title: str | None = None,
+    *,
+    debug: bool = False,
+    silent: bool = False,
+) -> list:
     """
     This performs the same moment calculations, but expects that all input
     derivatives and moments have been put in standardized form. It can also
@@ -925,7 +962,7 @@ def soerp_numeric(
         FOURTH CENTRAL MOMENT (MU4DL).............  3.8956371E+12
         COEFFICIENT OF KURTOSIS (BETA2)...........  4.1121529E+00
         ********************************************************************************
-    """
+    """  # noqa: E501
     if not silent:
         print("\n", "*" * 80)
         if title:
@@ -970,7 +1007,7 @@ def soerp_numeric(
         for i in range(n - 1):
             for j in range(i + 1, n):
                 print(
-                    f"Variance Contribution of cp[x{i:d}, x{j:d}]: {vcp[i, j]:7.5%}"
+                    f"Variance Contribution of cp[x{i:d}, x{j:d}]: {vcp[i, j]:7.5%}"  # noqa: E501
                 )
 
     ############################
@@ -1022,3 +1059,29 @@ if __name__ == "__main__":
     print(f"  Variance................ {m[1]}")
     print(f"  Standardized Skewness... {m[2]}")
     print(f"  Standardized Kurtosis... {m[3]}")
+
+
+###############################################################################
+
+
+def raw2central(v: list) -> list:
+    """Convert raw moments (1 to len(v)) to central moments
+
+    Returns
+    -------
+    central_moments : list
+        The central moments corresponding to the input raw moments.
+    """
+
+    def nci(n: int, i: int) -> float:
+        return math.factorial(n) / (math.factorial(i) * math.factorial(n - i))
+
+    v = [1, *v]
+    central_moments = []
+    for k in range(len(v)):
+        val = 0.0
+        for j in range(k + 1):
+            val += (-1) ** j * nci(k, j) * v[k - j] * v[1] ** j
+        central_moments.append(val)
+
+    return central_moments[1:]

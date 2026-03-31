@@ -13,7 +13,7 @@ maintainers = [
     { name = "Saud Zahir", email = "m.saud.zahir@gmail.com" },
     { name = "M Laraib Ali", email = "laraibg786@outlook.com" }
 ]
-readme = "README.rst"
+readme = "README.md"
 license = "BSD-3-Clause"
 
 keywords = [
@@ -58,8 +58,7 @@ classifiers = [
 
 dependencies = [
     "numpy",
-    "scipy",
-    "matplotlib",
+    "scipy"
 ]
 
 requires-python = ">=3.10"
@@ -78,10 +77,7 @@ dev = [
   {include-group = "test"}
 ]
 docs = [
-    "mkdocs>=1.6.1",
-    "mkdocs-material>=9.7.1",
-    "mkdocs-minify-plugin>=0.8.0",
-    "pymdown-extensions>=10.15",
+    "zensical>=0.0.23"
 ]
 lint = [
     "ruff==0.15.*",
@@ -90,6 +86,14 @@ test = [
     "pytest>=8.3.5",
     "pytest-cov>=7.0.0",
     "pytest-xdist>=3.6.1",
+]
+
+[project.optional-dependencies]
+plot = [
+    "matplotlib"
+]
+all = [
+    "matplotlib"
 ]
 
 [tool.hatch.version]
@@ -144,7 +148,14 @@ ignore = [
     "S311",      # [flake8-bandit](https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage/)
 ]
 
+
+# Ignore strict naming rules for soerp3 scientific code, but keep them for other modules.
 [tool.ruff.lint.per-file-ignores]
+"soerp3/*.py" = [
+    "N802",       # [pep8-naming](https://docs.astral.sh/ruff/rules/invalid-function-name/)
+    "N803",       # [pep8-naming](https://docs.astral.sh/ruff/rules/invalid-argument-name/)
+    "N806",       # [pep8-naming](https://docs.astral.sh/ruff/rules/non-lowercase-variable-in-function/)
+]
 "tests/*.py" = [
     "ANN001",     # [flake8-annotations](https://docs.astral.sh/ruff/rules/missing-type-function-argument/)
     "ANN201",     # [flake8-annotations](https://docs.astral.sh/ruff/rules/missing-return-type-undocumented-public-function/)
@@ -162,5 +173,5 @@ skip-magic-trailing-comma = true
 
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
-testpaths = ["tests", "soerp3"]
+testpaths = ["tests"]
 python_files = ["test_*.py"]

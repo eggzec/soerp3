@@ -1,0 +1,38 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [ published ]
+
+permissions:
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  testing:
+    uses: ./.github/workflows/code_test.yml
+
+  publish-to-pypi:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+
+    needs: testing
+
+    steps:
+      - *download_dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+
+      - name: Smoke Test on PyPI
+        shell: bash
+        run: |
+          sleep 60
+          pip install -v soerp3
+          python -c "import soerp3"
