@@ -5,6 +5,7 @@
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 [![codecov](https://codecov.io/gh/eggzec/soerp3/branch/master/graph/badge.svg)](https://codecov.io/gh/eggzec/soerp3)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=eggzec_soerp3&metric=alert_status)](https://sonarcloud.io/project/overview?id=eggzec_soerp3)
 [![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](./LICENSE)
 
 [![PyPI Downloads](https://img.shields.io/pypi/dm/soerp3.svg?label=PyPI%20downloads)](https://pypi.org/project/soerp3/)
