@@ -23,7 +23,14 @@ jobs:
     needs: testing
 
     steps:
-      - *download_dist
+
+      - &download_dist
+        name: Download Distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ needs.testing.outputs.artifact_name }}
+          run-id: ${{ needs.testing.outputs.artifact_run_id }}
+          path: ./dist
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -34,5 +41,16 @@ jobs:
         shell: bash
         run: |
           sleep 60
-          pip install -v soerp3
-          python -c "import soerp3"
+          pip install -v --index-url https://pypi.org/simple/ soerp3
+          python -c "import soerp3;print(soerp3.__version__)"
+
+  publish_docs:
+    needs: publish-to-pypi
+
+    permissions:
+      pages: write
+      id-token: write
+
+    uses: ./.github/workflows/docs_build.yml
+    with:
+      deploy: true
