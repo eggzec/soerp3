@@ -82,8 +82,8 @@ Q.describe()
 
 ## See Also
 
-- [uncertainties](http://pypi.python.org/pypi/uncertainties): First-order error propagation
-- [mcerp](http://pypi.python.org/pypi/mcerp): Real-time latin-hypercube sampling-based Monte Carlo error propagation
+- [uncertainties](http://pypi.python.org/pypi/uncertainties): First-Order Error Propagation
+- [mcerp](http://pypi.python.org/pypi/mcerp): Real-time Latin-Hypercube Sampling-based Monte Carlo Error Propagation
 
 ## Acknowledgements
 
