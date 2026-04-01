@@ -140,7 +140,7 @@ uv(0.5, 0.25, 2.0, 9.0) = -35665.8249653 or 35.773258%
 Here's a *slightly* more advanced example, estimating the statistical properties of volumetric gas flow through an orifice meter:
 
 ```python
->>> from soerp3.umath import *  # sin, exp, sqrt, etc.
+>>> from soerp3 import N, umath  # sin, exp, sqrt, etc.
 >>> H = N(64, 0.5)
 >>> M = N(16, 0.1)
 >>> P = N(361, 2)
