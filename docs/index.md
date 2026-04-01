@@ -19,7 +19,7 @@ To use `soerp3`, the **first eight statistical moments** of the underlying distr
 ## Example Usage
 
 ```python
-from soerp3 import *  # uv, N, U, Exp, etc.
+from soerp3 import uv, N, U, Exp, umath
 
 # Normal distribution, mean=10, std=1
 x = uv([10, 1, 0, 3, 0, 15, 0, 105])
@@ -52,8 +52,6 @@ print(Z.hessian([x1, x2, x3]))
 Z.error_components(pprint=True)
 
 # Orifice flow example
-from soerp3.umath import *
-
 H = N(64, 0.5)
 M = N(16, 0.1)
 P = N(361, 2)

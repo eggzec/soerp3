@@ -287,9 +287,13 @@ wght.error_components(pprint=True)
 ```
 
 ## Moments, Correlations, Derivatives
+
+You can access moments, correlations, and derivatives for any uncertain variable:
+
 ```python
 # Example: moments and derivatives
-from soerp3 import N
+from soerp3 import N, uv, Exp
+import scipy.stats as ss
 
 x1 = N(24, 1)
 x2 = N(37, 4)
@@ -305,9 +309,7 @@ print(Z.d2c(x1, x3))  # Mixed second derivative
 print(Z.gradient([x1, x2, x3]))
 print(Z.hessian([x1, x2, x3]))
 Z.error_components(pprint=True)
-```
-You can access moments, correlations, and derivatives for any uncertain variable:
-```python
+
 x1.moments()
 Z.moments()
 x1 - x1
@@ -336,5 +338,4 @@ Z.d2c(x1, x3)
 Z.gradient([x1, x2, x3])
 Z.hessian([x1, x2, x3])
 Z.error_components(pprint=True)
-t = N(165, 0.5)
 ```
