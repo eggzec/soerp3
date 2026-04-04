@@ -75,7 +75,7 @@ jobs:
           run-id: ${{ needs.fresh_build.outputs.run_id }}
           path: ./dist
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.py-version }}
 
